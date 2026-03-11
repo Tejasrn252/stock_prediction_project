@@ -1,0 +1,9 @@
+node_modules/
+__pycache__/
+.env
+
+*.h5
+*.save
+
+backend/nifty500_dataset.csv
+backend/nifty500_features.csv
