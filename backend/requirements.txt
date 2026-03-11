@@ -1,0 +1,15 @@
+flask
+pymongo
+python-dotenv
+werkzeug
+pyjwt
+bcrypt
+yfinance
+pandas
+numpy
+scikit-learn
+tensorflow
+xgboost
+joblib
+shap
+ta
