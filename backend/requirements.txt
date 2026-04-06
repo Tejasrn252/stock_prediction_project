@@ -1,4 +1,5 @@
 flask
+flask-cors
 pymongo
 python-dotenv
 werkzeug
@@ -7,9 +8,10 @@ bcrypt
 yfinance
 pandas
 numpy
-scikit-learn
+scikit-learn==1.8.0
 tensorflow
 xgboost
 joblib
 shap
 ta
+requests

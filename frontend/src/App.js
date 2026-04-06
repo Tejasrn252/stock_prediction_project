@@ -6,6 +6,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Recommendations from "./pages/Recommendations";
 import Charts from "./pages/Charts";
+import History from "./pages/History";
+import Contact from "./pages/Contact";
 
 function App() {
 
@@ -24,6 +26,8 @@ function App() {
         <Route path="/prediction" element={token ? <Prediction /> : <Login />} />
         <Route path="/recommend" element={token ? <Recommendations /> : <Login />} />
         <Route path="/charts" element={token ? <Charts /> : <Login />} />
+        <Route path="/history" element={token ? <History /> : <Login />} />
+        <Route path="/contact" element={token ? <Contact /> : <Login />} />
 
       </Routes>
     </BrowserRouter>
