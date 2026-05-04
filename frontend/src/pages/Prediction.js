@@ -30,6 +30,7 @@ const requestPrediction = async (token, targetTicker, forceRefresh) => {
   const uniqueTargets = [...new Set(PREDICT_ENDPOINTS)];
   let successPayload = null;
   let lastFailureMessage = "";
+  let isTokenExpired = false;
 
   for (const endpoint of uniqueTargets) {
     try {
@@ -53,6 +54,12 @@ const requestPrediction = async (token, targetTicker, forceRefresh) => {
       lastFailureMessage = data.error || `Request failed (${response.status})`;
 
       if (response.status === 401) {
+        isTokenExpired = true;
+        if (data?.error?.toLowerCase().includes("expired")) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("userName");
+          window.location.href = "/login?message=Session%20expired.%20Please%20login%20again.";
+        }
         break;
       }
     } catch (networkError) {
@@ -62,7 +69,8 @@ const requestPrediction = async (token, targetTicker, forceRefresh) => {
 
   return {
     successPayload,
-    lastFailureMessage
+    lastFailureMessage,
+    isTokenExpired
   };
 };
 

@@ -32,9 +32,14 @@ app = Flask(__name__)
 CORS(app)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("ERROR: SECRET_KEY not found in .env file! Please add SECRET_KEY=your_secret_key to backend/.env")
 
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
+
+if not MONGO_URI or not DB_NAME:
+    raise ValueError("ERROR: MONGO_URI or DB_NAME not found in .env file!")
 
 client = MongoClient(MONGO_URI)
 db = client[DB_NAME]
@@ -311,16 +316,26 @@ def token_required(f):
         auth_header = request.headers.get("Authorization")
 
         if auth_header:
-            token = auth_header.split(" ")[1]
+            try:
+                token = auth_header.split(" ")[1]
+            except IndexError:
+                return jsonify({"error": "Invalid Authorization header format. Use: Authorization: Bearer <token>"}), 401
 
         if not token:
-            return jsonify({"error": "Token missing"}), 401
+            return jsonify({"error": "Token missing. Please login first"}), 401
 
         try:
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             current_user = users.find_one({"email": data["email"]})
-        except:
-            return jsonify({"error": "Invalid token"}), 401
+            if not current_user:
+                return jsonify({"error": "User not found. Please login again"}), 401
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired. Please login again", "code": "TOKEN_EXPIRED"}), 401
+        except jwt.InvalidTokenError as e:
+            return jsonify({"error": f"Invalid token: {str(e)}"}), 401
+        except Exception as e:
+            app.logger.error(f"Token validation error: {str(e)}")
+            return jsonify({"error": f"Token validation failed: {str(e)}"}), 401
 
         return f(current_user, *args, **kwargs)
 
@@ -374,7 +389,7 @@ def login():
     token = jwt.encode(
         {
             "email": email,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30)
         },
         SECRET_KEY,
         algorithm="HS256"
